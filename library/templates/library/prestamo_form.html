@@ -1,0 +1,156 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if object %}Editar Préstamo{% else %}Nuevo Préstamo{% endif %} | BiblioGestion
+{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'home' %}">Sistema</a></li>
+<li class="breadcrumb-item"><a href="{% url 'prestamo-list' %}">Préstamos</a></li>
+<li class="breadcrumb-item active">{% if object %}Editar #{{ object.id }}{% else %}Nuevo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg overflow-hidden">
+            <!-- Header Premium -->
+            <div class="card-header bg-white py-4 px-5 border-bottom">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                        <i class="bi bi-journal-plus text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">{% if object %}Modificar Préstamo{% else %}Registrar Préstamo{% endif %}</h4>
+                        <p class="text-muted small mb-0">Complete los campos para gestionar el flujo de biblioteca.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body p-5">
+                {% if not form.hay_libros and not object %}
+                <div class="text-center py-5">
+                    <div class="bg-light rounded-circle p-4 d-inline-flex mb-4">
+                        <i class="bi bi-bookshelf text-muted fs-1"></i>
+                    </div>
+                    <h5 class="fw-bold">No hay libros disponibles</h5>
+                    <p class="text-muted mb-4">Lo sentimos, todos los ejemplares están actualmente prestados. <br> Intente de nuevo cuando se realice una devolución.</p>
+                    <a href="{% url 'prestamo-list' %}" class="btn btn-light px-4 rounded-pill">Volver al Listado</a>
+                </div>
+                {% else %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <!-- Seccion: Información Principal -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <label class="info-label mb-2">{{ form.usuario.label }}</label>
+                                {{ form.usuario }}
+                                {% if form.usuario.errors %}
+                                    <div class="text-danger x-small mt-1">{{ form.usuario.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <label class="info-label mb-2">{{ form.libro.label }}</label>
+                                {{ form.libro }}
+                                {% if form.libro.errors %}
+                                    <div class="text-danger x-small mt-1">{{ form.libro.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Seccion: Fechas -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <label class="info-label mb-2">{{ form.fecha_prestamo.label }}</label>
+                                {{ form.fecha_prestamo }}
+                                {% if form.fecha_prestamo.errors %}
+                                    <div class="text-danger x-small mt-1">{{ form.fecha_prestamo.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <label class="info-label mb-2">{{ form.fecha_devolucion.label }}</label>
+                                {{ form.fecha_devolucion }}
+                                {% if form.fecha_devolucion.errors %}
+                                    <div class="text-danger x-small mt-1">{{ form.fecha_devolucion.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Seccion: Estado y Notas -->
+                        <div class="col-md-12">
+                            <div class="form-group mb-4">
+                                <label class="info-label mb-2">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger x-small mt-1">{{ form.estado.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group mb-2">
+                                <label class="info-label mb-2">{{ form.observaciones.label }}</label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="text-danger x-small mt-1">{{ form.observaciones.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="mt-5 pt-4 border-top d-flex justify-content-between align-items-center">
+                        <a href="{% url 'prestamo-list' %}" class="btn btn-light px-4 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill shadow-lg fw-bold" {% if not form.hay_libros and not object %}disabled{% endif %}>
+                            <i class="bi bi-check2-circle me-2"></i>
+                            {% if object %}Guardar Cambios{% else %}Confirmar Préstamo{% endif %}
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tip de Ayuda -->
+        <div class="mt-4 p-4 bg-primary bg-opacity-10 rounded-4 border border-primary border-opacity-10 d-flex gap-3 align-items-start">
+            <i class="bi bi-lightbulb text-primary fs-4"></i>
+            <div>
+                <h6 class="fw-bold text-primary mb-1">Dato Útil</h6>
+                <p class="text-primary opacity-75 small mb-0">Al confirmar un préstamo activo, el ejemplar seleccionado dejará de estar disponible automáticamente en el catálogo hasta que sea devuelto.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-select, .form-control {
+        border-color: #e2e8f0;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    .form-select:focus, .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+    .info-label {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+</style>
+{% endblock %}

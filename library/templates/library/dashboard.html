@@ -1,0 +1,170 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Resumen | BiblioGestion{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item active">Panel Principal</li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-5">
+    <h1 class="mb-1">Panel Principal</h1>
+    <p class="text-muted lead">Monitoree y gestione las operaciones de su biblioteca en tiempo real.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-item h-100">
+            <div class="icon-box icon-blue">
+                <i class="bi bi-journal-text"></i>
+            </div>
+            <p class="text-muted small fw-bold text-uppercase mb-1">Total Préstamos</p>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="mb-0">{{ total_prestamos }}</h2>
+                <span class="text-success small fw-bold"><i class="bi bi-arrow-up"></i> 12%</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-item h-100">
+            <div class="icon-box icon-green">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <p class="text-muted small fw-bold text-uppercase mb-1">Activos Ahora</p>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="mb-0 text-success">{{ prestamos_activos }}</h2>
+                <span class="text-muted small">En Vivo</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-item h-100">
+            <div class="icon-box icon-orange">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </div>
+            <p class="text-muted small fw-bold text-uppercase mb-1">Devueltos</p>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="mb-0">{{ prestamos_devueltos }}</h2>
+                <span class="text-muted small">Histórico</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-item h-100">
+            <div class="icon-box icon-red">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <p class="text-muted small fw-bold text-uppercase mb-1">Libros Disponibles</p>
+            <div class="d-flex align-items-baseline gap-2">
+                <h2 class="mb-0">{{ libros_disponibles }}</h2>
+                <span class="text-muted small">En Stock</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-5">
+    <!-- Activity Table -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-0">
+                <div class="px-4 py-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Actividad Reciente</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'prestamo-create' %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Nuevo Préstamo
+                        </a>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Recurso</th>
+                                <th>Miembro</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recientes %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-light rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-book text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small">{{ p.libro.titulo }}</div>
+                                            <div class="text-muted x-small">{{ p.libro.autor }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold small text-dark">{{ p.usuario.nombre }}</div>
+                                    <div class="text-muted x-small">{{ p.usuario.email }}</div>
+                                </td>
+                                <td class="small text-muted">{{ p.fecha_prestamo|date:"d M" }}</td>
+                                <td>
+                                    <span class="badge-soft {% if p.estado == 'ACTIVO' %}bg-soft-success{% elif p.estado == 'DEVUELTO' %}bg-soft-warning{% else %}bg-soft-danger{% endif %} small">
+                                        {{ p.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'prestamo-detail' p.pk %}" class="btn-icon">
+                                        <i class="bi bi-arrow-right-short fs-5"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-5 text-muted small">No hay movimientos recientes.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-4 py-3 bg-light bg-opacity-50 border-top text-center">
+                    <a href="{% url 'prestamo-list' %}" class="text-decoration-none small fw-bold text-primary">Ver todas las transacciones</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Info / Health -->
+    <div class="col-lg-4">
+        <div class="card border-0 mb-4 bg-white">
+            <div class="card-body p-4">
+                <h5 class="mb-4">Estado del Sistema</h5>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="small fw-bold">Capacidad de Inventario</span>
+                        <span class="small text-muted">78%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-primary" style="width: 78%"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="small fw-bold">Miembros Activos</span>
+                        <span class="small text-muted">92%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: 92%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 bg-primary text-white p-4 overflow-hidden position-relative">
+            <div class="position-relative" style="z-index: 2;">
+                <h5 class="fw-bold mb-3">Soporte Empresarial</h5>
+                <p class="small opacity-75 mb-4">¿Necesita ayuda con la configuración de su biblioteca? Acceda a nuestros recursos técnicos.</p>
+                <a href="{% url 'api-docs-page' %}" class="btn btn-light btn-sm rounded-pill fw-bold px-4">Documentación</a>
+            </div>
+            <i class="bi bi-lightning-charge-fill position-absolute bottom-0 end-0 m-n3 opacity-10" style="font-size: 8rem;"></i>
+        </div>
+    </div>
+</div>
+{% endblock %}
